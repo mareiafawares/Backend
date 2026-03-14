@@ -5,7 +5,7 @@ from database import connection, models
 from schemas import user_schemas 
 from utils import verify_password, hash_password 
 
-# تعريف الراوتر (كان ناقص وسبب خطأ)
+
 router = APIRouter(tags=["Authentication"])
 
 ADMIN_EMAIL = "mareiafawares@gmail.com"
@@ -13,7 +13,7 @@ ADMIN_PASSWORD = "mareia2003"
 
 @router.post("/login")
 def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(connection.get_db)):
-    # 1. التحقق من حساب الأدمن
+   
     if user_credentials.username == ADMIN_EMAIL and user_credentials.password == ADMIN_PASSWORD:
         return {
             "access_token": "admin_master_token_2026",
@@ -24,17 +24,17 @@ def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session =
             "shops": [] 
         }
 
-    # 2. البحث عن المستخدم
+    
     user = db.query(models.User).filter(models.User.email == user_credentials.username).first()
     
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
 
-    # 3. التحقق من الباسورد
+   
     if not verify_password(user_credentials.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Password incorrect")
 
-    # 4. الرد مع قائمة المتاجر
+   
     return {
         "access_token": f"session_{user.id}",
         "token_type": "bearer",

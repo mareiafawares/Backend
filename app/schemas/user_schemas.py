@@ -2,13 +2,31 @@ from pydantic import BaseModel, EmailStr
 from enum import Enum
 from typing import Optional, List
 
-# 1. الرتب المتاحة في النظام
+
 class UserRegisterRole(str, Enum):
     admin = "admin"
     seller = "seller"
     customer = "customer"
 
-# 2. سكيما المتجر (تفاصيل كل محل)
+
+class ProductBase(BaseModel):
+    name: str
+    price: float
+    description: Optional[str] = None
+    imageUrl: str
+    stockQuantity: int
+    shop_id: int
+
+class ProductCreate(ProductBase):
+    pass
+
+class Product(ProductBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
 class ShopOut(BaseModel):
     id: int
     name: str
@@ -16,37 +34,46 @@ class ShopOut(BaseModel):
     is_approved: bool
     has_shop_request: bool
     owner_id: int
+    
 
     class Config:
         from_attributes = True
 
-# 3. النموذج الأساسي للمستخدم
+
 class UserBase(BaseModel):
     username: str
     email: EmailStr
 
-# 4. تسجيل مستخدم جديد
+
 class UserCreate(UserBase):
     password: str
     role: UserRegisterRole
 
-# 5. تسجيل الدخول
+
 class UserLoginSchema(BaseModel):
     email: EmailStr
     password: str
 
-# 6. طلب إنشاء متجر
+
 class ShopCreateRequest(BaseModel):
     shop_name: str
     shop_description: str
 
-# 7. النموذج النهائي للمستخدم (يرسل قائمة متاجر)
+
 class UserOut(BaseModel):
     id: int
     username: str
     email: EmailStr
     role: str
-    shops: List[ShopOut] = [] # الحل الصحيح للتعدد
+    shops: List[ShopOut] = [] 
 
     class Config:
         from_attributes = True
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    email: Optional[str] = None

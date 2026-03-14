@@ -4,7 +4,7 @@ from schemas import user_schemas
 from database import models, connection
 from utils import hash_password 
 
-# تعريف الراوتر
+
 router = APIRouter(tags=["Users"])
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=user_schemas.UserOut)
@@ -29,7 +29,7 @@ def create_user(user: user_schemas.UserCreate, db: Session = Depends(connection.
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
-# الدالة السحرية: إضافة متجر جديد للقائمة
+#
 @router.post("/create-shop/{user_id}", response_model=user_schemas.UserOut)
 def create_shop_request(
     user_id: int, 
@@ -42,7 +42,7 @@ def create_shop_request(
         raise HTTPException(status_code=404, detail="User not found")
     
     try:
-        # إنشاء سطر جديد تماماً في جدول المتاجر
+
         new_shop = models.Shop(
             name=shop_data.shop_name,
             description=shop_data.shop_description,
@@ -53,7 +53,7 @@ def create_shop_request(
 
         db.add(new_shop)
         db.commit()
-        db.refresh(user) # لتحديث قائمة المتاجر عند اليوزر
+        db.refresh(user) 
         return user 
 
     except Exception as e:
