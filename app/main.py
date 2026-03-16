@@ -14,13 +14,11 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Device Hub API")
 
 
-
 if not os.path.exists("static/products"):
     os.makedirs("static/products")
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
 
 
 app.add_middleware(
@@ -44,4 +42,8 @@ app.include_router(orders_router.router, prefix="/orders", tags=["Orders Managem
 
 @app.get("/")
 def root():
-    return {"message": "API is running successfully"}
+    return {
+        "message": "Device Hub API is running successfully",
+        "status": "Healthy",
+        "version": "1.0.0"
+    }
