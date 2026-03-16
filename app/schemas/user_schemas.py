@@ -62,6 +62,7 @@ class ShopOut(BaseModel):
     id: int
     name: str
     description: Optional[str] = None
+    image_url: Optional[str] = None
     is_approved: bool
     has_shop_request: bool
     owner_id: int
@@ -83,8 +84,9 @@ class UserLogin(BaseModel):
     password: str
 
 class ShopCreateRequest(BaseModel):
-    shopName: str
-    shopDescription: str
+    shop_name: str
+    shop_description: str
+    image_url: Optional[str] = None
 
 class UserOut(BaseModel):
     id: int

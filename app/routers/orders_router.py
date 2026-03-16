@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-from database.connection import get_db 
-from database import models
-from schemas import order_schemas 
+from app.database.connection import get_db
+from app.database import models
+from app.schemas import order_schemas
 
 router = APIRouter(tags=["Orders Management"])
 
@@ -41,7 +41,7 @@ async def create_order(order_data: order_schemas.OrderCreate, db: Session = Depe
         db.add(order_item)
         
         
-        product.stockQuantity -= item.quantity
+        product.stock_quantity -= item.quantity
 
     db.commit()
     return {"message": "Order created successfully", "order_id": new_order.id}
