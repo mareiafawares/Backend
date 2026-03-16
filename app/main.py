@@ -2,11 +2,11 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from database.connection import engine
-from database import models
+from app.database.connection import engine
+from app.database import models
 
 
-from routers import users, auth, admin, products_router, orders_router 
+from app.routers import users, auth, admin, products_router, orders_router, upload
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -39,6 +39,7 @@ app.include_router(products_router.router, prefix="/products", tags=["Products M
 
 
 app.include_router(orders_router.router, prefix="/orders", tags=["Orders Management"])
+app.include_router(upload.router)
 
 @app.get("/")
 def root():

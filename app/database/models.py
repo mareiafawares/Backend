@@ -27,9 +27,10 @@ class Shop(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     description = Column(String, nullable=True)
+    image_url = Column(String, nullable=True)
     is_approved = Column(Boolean, default=False)
     has_shop_request = Column(Boolean, default=True)
-    
+
     owner_id = Column(Integer, ForeignKey("users.id"))
     owner = relationship("User", back_populates="shops")
     
@@ -44,8 +45,8 @@ class Product(Base):
     name = Column(String, index=True, nullable=False)
     description = Column(String, nullable=True)
     price = Column(Float, nullable=False)
-    discountPrice = Column(Float, nullable=True) 
-    stockQuantity = Column(Integer, default=0)   
+    discount_price = Column(Float, nullable=True)
+    stock_quantity = Column(Integer, default=0)
     status = Column(String, default="Available")
     category = Column(String, nullable=True)
     is_new = Column(Boolean, default=True)
