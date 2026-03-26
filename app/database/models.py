@@ -3,7 +3,6 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .connection import Base 
 
-
 class User(Base):
     __tablename__ = "users"
 
@@ -13,12 +12,14 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     role = Column(String, default="customer") 
 
-    
+  
     shops = relationship("Shop", back_populates="owner")
     products = relationship("Product", back_populates="owner")
     reviews = relationship("Review", back_populates="user")
     orders = relationship("Order", back_populates="buyer")
-
+    
+   
+    favorites = relationship("Favorite", back_populates="user", cascade="all, delete-orphan")
 
 
 class Shop(Base):
@@ -35,7 +36,7 @@ class Shop(Base):
     owner = relationship("User", back_populates="shops")
     
     products = relationship("Product", back_populates="shop", cascade="all, delete-orphan")
-
+    orders = relationship("Order", back_populates="shop")
 
 
 class Product(Base):
@@ -52,19 +53,18 @@ class Product(Base):
     is_new = Column(Boolean, default=True)
     is_approved = Column(Boolean, default=False)
 
-    
     owner_id = Column(Integer, ForeignKey("users.id"))
     shop_id = Column(Integer, ForeignKey("shops.id"))
 
-   
     owner = relationship("User", back_populates="products")
     shop = relationship("Shop", back_populates="products")
 
-    
     images = relationship("ProductImage", back_populates="product", cascade="all, delete-orphan")
     reviews = relationship("Review", back_populates="product", cascade="all, delete-orphan")
-    orders = relationship("Order", back_populates="product")
-
+    order_items = relationship("OrderItem", back_populates="product")
+    
+   
+    favorited_by = relationship("Favorite", back_populates="product", cascade="all, delete-orphan")
 
 
 class ProductImage(Base):
@@ -76,12 +76,11 @@ class ProductImage(Base):
     product = relationship("Product", back_populates="images")
 
 
-
 class Review(Base):
     __tablename__ = "reviews"
     id = Column(Integer, primary_key=True, index=True)
     comment = Column(Text, nullable=True)
-    rating = Column(Integer, default=5)  
+    rating = Column(Integer, default=5, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     user_id = Column(Integer, ForeignKey("users.id"))
@@ -92,13 +91,53 @@ class Review(Base):
 
 
 
+class Favorite(Base):
+    __tablename__ = "favorites"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    product_id = Column(Integer, ForeignKey("products.id", ondelete="CASCADE"))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+   
+    user = relationship("User", back_populates="favorites")
+    product = relationship("Product", back_populates="favorited_by")
+
+
 class Order(Base):
     __tablename__ = "orders"
     id = Column(Integer, primary_key=True, index=True)
+    
+    full_name = Column(String, nullable=False)
+    phone_number = Column(String, nullable=False)
+    city = Column(String, nullable=False)
+    address_details = Column(Text, nullable=False)
+    delivery_notes = Column(Text, nullable=True)
+    
+    total_price = Column(Float, nullable=False)
+    status = Column(String, default="Pending") 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     buyer_id = Column(Integer, ForeignKey("users.id"))
+    buyer = relationship("User", back_populates="orders")
+
+    shop_id = Column(Integer, ForeignKey("shops.id"))
+    shop = relationship("Shop", back_populates="orders")
+    
+    items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
+
+
+class OrderItem(Base):
+    __tablename__ = "order_items"
+    id = Column(Integer, primary_key=True, index=True)
+    
+    order_id = Column(Integer, ForeignKey("orders.id"))
     product_id = Column(Integer, ForeignKey("products.id"))
     
-    buyer = relationship("User", back_populates="orders")
-    product = relationship("Product", back_populates="orders")
+    quantity = Column(Integer, nullable=False)
+    price_at_purchase = Column(Float, nullable=False)
+    product_name = Column(String, nullable=True) 
+    product_image = Column(String, nullable=True) 
+
+    order = relationship("Order", back_populates="items")
+    product = relationship("Product", back_populates="order_items")

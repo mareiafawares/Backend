@@ -20,7 +20,7 @@ def _safe_ext(content_type: str) -> str:
     return m.get(content_type, ".jpg")
 
 
-@router.post("/upload/image")
+@router.post("/image")
 async def upload_image(
     file: UploadFile = File(...),
     current_user=Depends(get_current_user),
@@ -40,7 +40,7 @@ async def upload_image(
     path = os.path.join(UPLOAD_DIR, name).replace("\\", "/")
     try:
         content = await file.read()
-        if len(content) > 10 * 1024 * 1024:  # 10 MB
+        if len(content) > 10 * 1024 * 1024:  
             raise HTTPException(status_code=400, detail="File too large (max 10 MB)")
         with open(path, "wb") as f:
             f.write(content)

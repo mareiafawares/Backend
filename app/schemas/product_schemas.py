@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
-
+from datetime import datetime
 
 class ProductImageOut(BaseModel):
     id: int
@@ -27,12 +27,30 @@ class ProductAddRequest(BaseModel):
     price: float
     description: Optional[str] = None
     stock_quantity: int = 0
-    image_urls: Optional[List[str]] = None  # from /upload/image; first = primary
+    image_urls: Optional[List[str]] = None 
 
 
 class Product(ProductBase):
     id: int
     shop_id: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ReviewCreate(BaseModel):
+    """Data required from the Flutter app when adding a new review"""
+    product_id: int
+    rating: int  
+    comment: str
+
+
+class ReviewOut(BaseModel):
+    """The review format displayed to the customer on the product details page"""
+    id: int
+    user_id: int
+    rating: int
+    comment: str
+    created_at: datetime 
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -50,6 +68,7 @@ class ProductOut(BaseModel):
     is_new: bool
     is_approved: bool
     images: List[ProductImageOut] = []
+    reviews: List[ReviewOut] = []
 
     model_config = ConfigDict(from_attributes=True)
 

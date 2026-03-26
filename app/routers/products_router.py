@@ -29,7 +29,15 @@ def _product_to_dict(p: models.Product, include_reviews: bool = False) -> dict:
         "images": _product_images(p.images),
     }
     if include_reviews:
-        out["reviews"] = [{"id": r.id, "rating": r.rating, "comment": r.comment} for r in p.reviews]
+        out["reviews"] = [
+            {
+                "id": r.id, 
+                "rating": r.rating, 
+                "comment": r.comment,
+                "user_id": r.user_id,
+                "created_at": r.created_at.isoformat() if r.created_at else None
+            } for r in p.reviews
+        ]
     return out
 
 
@@ -188,3 +196,30 @@ async def delete_product(product_id: int, db: Session = Depends(get_db)):
     db.delete(product)
     db.commit()
     return {"message": "Product and its images deleted successfully"}
+
+@router.post("/reviews/", status_code=status.HTTP_201_CREATED)
+async def create_review(
+    body: product_schemas.ReviewCreate, 
+    db: Session = Depends(get_db),
+):
+    """Add a new review for a specific product by a customer"""
+    
+    product = db.query(models.Product).filter(models.Product.id == body.product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    new_review = models.Review(
+        product_id=body.product_id,
+        rating=body.rating,
+        comment=body.comment,
+        user_id=1 # Default user ID
+    )
+
+    try:
+        db.add(new_review)
+        db.commit()
+        db.refresh(new_review)
+        return {"message": "Review added successfully", "review": new_review.id}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to add review")

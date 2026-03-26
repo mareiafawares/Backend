@@ -6,28 +6,48 @@ from datetime import datetime
 class OrderItemBase(BaseModel):
     product_id: int
     quantity: int
+    price_at_purchase: float
+   
+    product_name: Optional[str] = None
+    product_image: Optional[str] = None
 
 class OrderItemCreate(OrderItemBase):
     pass
 
 class OrderItem(OrderItemBase):
     id: int
-    price: float
     model_config = ConfigDict(from_attributes=True)
 
 
-class OrderBase(BaseModel):
-    shop_id: int
-    user_id: int
 
-class OrderCreate(OrderBase):
+class OrderCreate(BaseModel):
+    
+    full_name: str
+    phone_number: str
+    city: str
+    address_details: str
+    delivery_notes: Optional[str] = None
+    
+    
+    total_price: float
+    shop_id: int 
+    
+   
     items: List[OrderItemCreate] 
 
-class Order(OrderBase):
+
+
+class OrderResponse(BaseModel):
     id: int
-    total_price: float
     status: str
+    total_price: float
+    shop_id: int
     created_at: datetime
-    items: List[OrderItem]
-    
+    items: List[OrderItem] = []
+
     model_config = ConfigDict(from_attributes=True)
+
+
+
+class OrderStatusUpdate(BaseModel):
+    status: str
